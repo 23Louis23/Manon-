@@ -376,6 +376,12 @@
     color: var(--muted);
   }
   .exo-meta b { color: var(--orange); font-weight: 600; }
+  .exo-series-block {
+    font-size: 11px;
+    color: var(--muted);
+    padding: 0 16px 8px;
+    line-height: 1.7;
+  }
   .slots-row {
     display: flex;
     gap: 6px;
@@ -479,6 +485,32 @@
   }
   .save-btn:hover { background: #c92c2c; }
   .save-btn:active { background: var(--red-deep); }
+  .save-btn.done-btn { background: var(--green); }
+  .save-btn.done-btn:hover { background: var(--green-light); }
+
+  /* ── MOBILITY TRACKER ── */
+  .mobility-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+  .mob-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .mob-day:hover { border-color: var(--orange); }
+  .mob-day.done { background: var(--green); border-color: var(--green); color: #fff; font-weight: 700; }
 
   /* ── DASHBOARD ── */
   .dash-grid {
@@ -566,6 +598,7 @@
 <!-- TAB NAV -->
 <div class="nav-tabs">
   <button class="tab-btn active" onclick="showTab('tab-seance')">📋 Séance</button>
+  <button class="tab-btn" onclick="showTab('tab-mobility')">🧘 Mobilité</button>
   <button class="tab-btn" onclick="showTab('tab-dashboard')">📊 Tableau de bord</button>
   <button class="tab-btn" onclick="showTab('tab-history')">🕐 Historique</button>
 </div>
@@ -635,15 +668,29 @@
     </div>
   </div>
 
-  <!-- Mobility routine (quotidienne, indépendante de la séance) -->
-  <div class="section-head">Routine mobilité / étirement — 20’ (à faire tous les jours si possible)</div>
-  <div class="warmup-card" id="mobility-card"></div>
+  <!-- Ressenti -->
+  <div class="section-head">Ressenti du jour</div>
+  <input type="text" id="feeling-note" class="note-input" style="margin-bottom:24px" placeholder="Comment tu te sens aujourd'hui ? (motivation, courbatures, sommeil...)">
 
   <!-- Exercises -->
   <div class="section-head" id="exo-section-title">Exercices</div>
   <div id="exo-list"></div>
 
   <button class="save-btn" onclick="saveSession()">💾 ENREGISTRER LA SÉANCE</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: MOBILITÉ                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="tab-mobility" class="view">
+  <div class="section-head">Routine mobilité / étirement — 20’ (à faire tous les jours si possible)</div>
+  <div class="warmup-card" id="mobility-routine-card"></div>
+
+  <button class="save-btn" id="mobility-today-btn" onclick="toggleMobilityDay(todayISO())">Marquer comme fait aujourd'hui</button>
+
+  <div class="section-head" style="margin-top:28px">Suivi (28 derniers jours)</div>
+  <div class="dash-grid" id="mobility-stats"></div>
+  <div class="mobility-grid" id="mobility-grid"></div>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -709,29 +756,29 @@ const SEANCES = {
     label: "1 — Force poids de corps",
     color: "#B22222",
     exercices: [
-      { nom: "Tractions",              series: "6 × 5",  recupTarget: "1'",  slots: ["Série 1","Série 2","Série 3","Série 4","Série 5","Série 6","Récup (s)"], recupSlot: true },
-      { nom: "Dips",                   series: "5 × 5",  recupTarget: "1'",  slots: ["Série 1","Série 2","Série 3","Série 4","Série 5","Récup (s)"], recupSlot: true },
-      { nom: "Pompes",                 series: "5 × 5",  recupTarget: "1'",  slots: ["Série 1","Série 2","Série 3","Série 4","Série 5","Récup (s)"], recupSlot: true },
-      { nom: "Handstand hold",         series: "4 × 30''", recupTarget: "30''", slots: ["Tenue 1 (s)","Tenue 2 (s)","Tenue 3 (s)","Tenue 4 (s)","Récup (s)"], recupSlot: true },
-      { nom: "Abdos — Sit up",             series: "3 tours × 45''", recupTarget: "15''", slots: ["Tour 1","Tour 2","Tour 3"], recupSlot: false },
-      { nom: "Abdos — Chandelle",          series: "3 tours × 45''", recupTarget: "15''", slots: ["Tour 1","Tour 2","Tour 3"], recupSlot: false },
-      { nom: "Abdos — Ciseaux jambes",     series: "3 tours × 45''", recupTarget: "15''", slots: ["Tour 1","Tour 2","Tour 3"], recupSlot: false },
-      { nom: "Abdos — Hollow",             series: "3 tours × 45''", recupTarget: "15''", slots: ["Tour 1","Tour 2","Tour 3"], recupSlot: false },
-      { nom: "Gainage",                series: "3 × 2' (45''axe / 30''côté / 15''axe)", recupTarget: "30''", slots: ["Tenue 1 (s)","Tenue 2 (s)","Tenue 3 (s)","Récup (s)"], recupSlot: true },
-      { nom: "Finisher — For time",    series: "2 tours : 20 cal row / 20 cal ski / 20 cal AB / 20 burpees (récup 1'30 entre tours)", recupTarget: "—", slots: ["Temps total (s)"], recupSlot: false },
+      { nom: "Tractions",              series: "6 × 5",  recupTarget: "1'" },
+      { nom: "Dips",                   series: "5 × 5",  recupTarget: "1'" },
+      { nom: "Pompes",                 series: "5 × 5",  recupTarget: "1'" },
+      { nom: "Handstand hold",         series: "4 × 30''", recupTarget: "30''" },
+      { nom: "Abdos — Sit up",             series: "3 tours × 45''", recupTarget: "15''" },
+      { nom: "Abdos — Chandelle",          series: "3 tours × 45''", recupTarget: "15''" },
+      { nom: "Abdos — Ciseaux jambes",     series: "3 tours × 45''", recupTarget: "15''" },
+      { nom: "Abdos — Hollow",             series: "3 tours × 45''", recupTarget: "15''" },
+      { nom: "Gainage",                series: "3 × 2' (45''axe / 30''côté / 15''axe)", recupTarget: "30''" },
+      { nom: "Finisher — For time",    series: "2 tours (récup 1'30 entre tours) :<br>— 20 cal row<br>— 20 cal ski<br>— 20 cal AB<br>— 20 burpees", recupTarget: "1'30 entre tours", multilineSeries: true, slots: ["Tour 1 (s)","Tour 2 (s)","Temps total (s)"] },
     ]
   },
   "2": {
     label: "2 — Cardio",
     color: "#7B1D1D",
     exercices: [
-      { nom: "Course à pied",            series: "10 min footing", recupTarget: "—", slots: ["Durée (min)"], recupSlot: false },
-      { nom: "Corde à sauter",           series: "6 × 1 min",      recupTarget: "1'", slots: ["Tours (/6)","Récup (s)"], recupSlot: true },
-      { nom: "Boxe",                     series: "10 × 30''/30'' intensité++", recupTarget: "—", slots: ["Rounds (/10)"], recupSlot: false },
-      { nom: "Vélo",                     series: "5' tranquille",  recupTarget: "—", slots: ["Durée (min)"], recupSlot: false },
-      { nom: "Tractions excentriques",   series: "5 × 5 (descente contrôlée)", recupTarget: "—", slots: ["Série 1","Série 2","Série 3","Série 4","Série 5"], recupSlot: false },
-      { nom: "Landmine rotation",        series: "4 × 10/côté",    recupTarget: "—", slots: ["Série 1","Série 2","Série 3","Série 4"], recupSlot: false },
-      { nom: "L-Sit",                    series: "4 × 15''",       recupTarget: "30''", slots: ["Tenue 1 (s)","Tenue 2 (s)","Tenue 3 (s)","Tenue 4 (s)","Récup (s)"], recupSlot: true },
+      { nom: "Course à pied",            series: "10 min footing", recupTarget: "—" },
+      { nom: "Corde à sauter",           series: "6 × 1 min",      recupTarget: "1'" },
+      { nom: "Boxe",                     series: "10 × 30''/30'' intensité++", recupTarget: "—" },
+      { nom: "Vélo",                     series: "5' tranquille",  recupTarget: "—" },
+      { nom: "Tractions excentriques",   series: "5 × 5 (descente contrôlée)", recupTarget: "—" },
+      { nom: "Landmine rotation",        series: "4 × 10/côté",    recupTarget: "—" },
+      { nom: "L-Sit",                    series: "4 × 15''",       recupTarget: "30''" },
     ]
   },
 };
@@ -765,6 +812,12 @@ function parseDateFrToISO(fr) {
 }
 function weekNum(w) {
   return parseInt((w || '').replace(/[^0-9]/g, ''), 10) || 0;
+}
+function isoDaysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  const pad = v => String(v).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -845,6 +898,7 @@ function showTab(id) {
   event.target.classList.add('active');
   if (id === 'tab-dashboard') renderDashboard();
   if (id === 'tab-history') renderHistory();
+  if (id === 'tab-mobility') renderMobilityTab();
 }
 
 function renderCycles() {
@@ -922,7 +976,7 @@ function renderSeance() {
   document.getElementById('sl-douleur').value = hooper.douleur;
   updateHooper();
 
-  document.getElementById('mobility-card').innerHTML = MOBILITY_ROUTINE;
+  document.getElementById('feeling-note').value = saved.notes?.['__ressenti'] ?? '';
 
   document.getElementById('exo-section-title').textContent = `Exercices — ${seance.label}`;
 
@@ -932,31 +986,42 @@ function renderSeance() {
 
   seance.exercices.forEach((exo, i) => {
     const savedNote = saved.notes?.[exo.nom] ?? '';
-    const savedArr = Array.isArray(saved.weights?.[exo.nom]) ? saved.weights[exo.nom] : [];
-    const slotsHtml = exo.slots.map((label, di) => {
-      const v = savedArr[di] ?? '';
-      const isRecup = exo.recupSlot && di === exo.slots.length - 1;
-      return `<div class="slot-input-wrap">
-        <span class="slot-label">${label}</span>
-        <input type="number" class="weight-input ${isRecup ? 'recup-input' : ''} ${v !== '' ? 'saved' : ''}"
-               id="w_${i}_${di}" value="${v}" placeholder="—" min="0" step="1"
-               oninput="this.classList.remove('saved')">
-      </div>`;
-    }).join('');
+    const hasSlots = Array.isArray(exo.slots) && exo.slots.length > 0;
+    const savedArr = hasSlots && Array.isArray(saved.weights?.[exo.nom]) ? saved.weights[exo.nom] : [];
+
+    const metaLine = exo.multilineSeries
+      ? ''
+      : `<div class="exo-meta-group">
+          <span class="exo-meta">Objectif : <b>${exo.series}</b></span>
+          <span class="exo-meta">Récup cible : <b>${exo.recupTarget}</b></span>
+        </div>`;
+    const seriesBlock = exo.multilineSeries
+      ? `<div class="exo-series-block">${exo.series}<br>Récup cible : <b>${exo.recupTarget}</b></div>`
+      : '';
+
+    let slotsRow = '';
+    if (hasSlots) {
+      const slotsHtml = exo.slots.map((label, di) => {
+        const v = savedArr[di] ?? '';
+        return `<div class="slot-input-wrap">
+          <span class="slot-label">${label}</span>
+          <input type="number" class="weight-input ${v !== '' ? 'saved' : ''}"
+                 id="w_${i}_${di}" value="${v}" placeholder="—" min="0" step="1"
+                 oninput="this.classList.remove('saved')">
+        </div>`;
+      }).join('');
+      slotsRow = `<div class="slots-row">${slotsHtml}</div>`;
+    }
 
     html += `<div class="exo-item">
       <div class="exo-line">
         <span class="exo-name">${exo.nom}</span>
-        <div class="exo-meta-group">
-          <span class="exo-meta">Objectif : <b>${exo.series}</b></span>
-          <span class="exo-meta">Récup cible : <b>${exo.recupTarget}</b></span>
-        </div>
+        ${metaLine}
       </div>
-      <div class="slots-row">
-        ${slotsHtml}
-      </div>
+      ${seriesBlock}
+      ${slotsRow}
       <div class="exo-note-row">
-        <input type="text" class="note-input" id="note_${i}" value="${savedNote}" placeholder="Note">
+        <input type="text" class="note-input" id="note_${i}" value="${savedNote}" placeholder="Réalisé / commentaire (ex: seulement 4x5, pas réussi la dernière série...)">
       </div>
     </div>`;
   });
@@ -1007,18 +1072,23 @@ async function saveSession() {
 
   const weights = {};
   const notes = {};
+  const feelingInput = document.getElementById('feeling-note');
+  if (feelingInput && feelingInput.value.trim()) notes['__ressenti'] = feelingInput.value.trim();
+
   seance.exercices.forEach((exo, i) => {
     const noteInput = document.getElementById(`note_${i}`);
     if (noteInput && noteInput.value.trim()) notes[exo.nom] = noteInput.value.trim();
-    const arr = exo.slots.map((_, di) => {
-      const input = document.getElementById(`w_${i}_${di}`);
-      if (input && input.value) {
-        input.classList.add('saved');
-        return +input.value;
-      }
-      return null;
-    });
-    if (arr.some(v => v !== null)) weights[exo.nom] = arr;
+    if (Array.isArray(exo.slots) && exo.slots.length > 0) {
+      const arr = exo.slots.map((_, di) => {
+        const input = document.getElementById(`w_${i}_${di}`);
+        if (input && input.value) {
+          input.classList.add('saved');
+          return +input.value;
+        }
+        return null;
+      });
+      if (arr.some(v => v !== null)) weights[exo.nom] = arr;
+    }
   });
 
   const entry = {
@@ -1066,7 +1136,9 @@ function getCycleSeanceCodes(cycle) {
 
 function renderDashboard() {
   const data = loadData();
-  const sessions = Object.values(data);
+  // Exclut les check-ins de la routine mobilité (week === 'MOB'), qui partagent la même
+  // table mais ne sont pas des séances du programme.
+  const sessions = Object.values(data).filter(s => s.week !== 'MOB');
   const totalSessions = sessions.length;
   const totalWeeks = new Set(sessions.map(s => s.week)).size;
 
@@ -1186,17 +1258,6 @@ function buildHooperChart(points) {
   </svg>`;
 }
 
-// Pour chaque exercice, calcule le total "performance" (somme des cases hors récup) et,
-// si l'exercice suit la récup, la valeur de récup — à partir du tableau stocké en base.
-function computeExoMetrics(exo, savedWeights) {
-  const arr = Array.isArray(savedWeights) ? savedWeights : [];
-  const perfCount = exo.recupSlot ? exo.slots.length - 1 : exo.slots.length;
-  const perfVals = arr.slice(0, perfCount).filter(v => typeof v === 'number');
-  const perfSum = perfVals.length ? perfVals.reduce((a, b) => a + b, 0) : null;
-  const recupVal = exo.recupSlot && typeof arr[exo.slots.length - 1] === 'number' ? arr[exo.slots.length - 1] : null;
-  return { perfSum, recupVal };
-}
-
 function renderDashCharts() {
   const data = loadData();
   const sessions = Object.values(data);
@@ -1210,43 +1271,86 @@ function renderDashCharts() {
   const cycleWeeks = dashCycle ? CYCLES[dashCycle].weeks : [];
   const codeSessions = sessions.filter(s => s.seance === dashSeance && cycleWeeks.includes(s.week)).sort((a, b) => weekNum(a.week) - weekNum(b.week));
   const def = SEANCES[dashSeance];
-  const exoList = def ? def.exercices : [];
+  const exoList = def ? def.exercices.filter(e => Array.isArray(e.slots) && e.slots.length > 0) : [];
 
   let html = '';
   exoList.forEach(exo => {
-    const perfPoints = [];
-    const recupPoints = [];
-    codeSessions.forEach(s => {
-      const { perfSum, recupVal } = computeExoMetrics(exo, s.weights?.[exo.nom]);
-      if (perfSum !== null) perfPoints.push({ week: s.week, val: perfSum, date: s.date });
-      if (recupVal !== null) recupPoints.push({ week: s.week, val: recupVal, date: s.date });
+    exo.slots.forEach((label, di) => {
+      const points = codeSessions
+        .map(s => ({ week: s.week, val: Array.isArray(s.weights?.[exo.nom]) ? s.weights[exo.nom][di] : undefined, date: s.date }))
+        .filter(p => typeof p.val === 'number');
+      if (!points.length) return;
+      html += `
+        <div class="stat-card" style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:13px;font-weight:500">${exo.nom} — ${label}</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--gold)">${points[points.length-1].val}</span>
+          </div>
+          ${buildLineChart(points)}
+        </div>
+      `;
     });
-    if (!perfPoints.length && !recupPoints.length) return;
-
-    if (perfPoints.length) {
-      html += `
-        <div class="stat-card" style="margin-bottom:12px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <span style="font-size:13px;font-weight:500">${exo.nom} — Total réalisé</span>
-            <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--gold)">${perfPoints[perfPoints.length-1].val}</span>
-          </div>
-          ${buildLineChart(perfPoints)}
-        </div>
-      `;
-    }
-    if (recupPoints.length) {
-      html += `
-        <div class="stat-card" style="margin-bottom:12px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <span style="font-size:13px;font-weight:500">${exo.nom} — Récup utilisée</span>
-            <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--green-light)">${recupPoints[recupPoints.length-1].val}s</span>
-          </div>
-          ${buildLineChart(recupPoints, 's')}
-        </div>
-      `;
-    }
   });
   chartEl.innerHTML = html || `<p style="color:var(--muted);font-size:13px">Aucune donnée enregistrée pour cette séance.</p>`;
+}
+
+// ═══════════════════════════════════════════════════
+// MOBILITÉ (routine quotidienne, indépendante des séances)
+// Réutilise la table sessions existante avec week="MOB" et seance=<date ISO du jour>,
+// pour éviter de créer une nouvelle table Supabase juste pour ce suivi.
+// ═══════════════════════════════════════════════════
+function renderMobilityTab() {
+  document.getElementById('mobility-routine-card').innerHTML = MOBILITY_ROUTINE;
+
+  const data = loadData();
+  const mobDates = new Set(Object.values(data).filter(s => s.week === 'MOB').map(s => s.seance));
+
+  const todayIso = isoDaysAgo(0);
+  const doneToday = mobDates.has(todayIso);
+  const btn = document.getElementById('mobility-today-btn');
+  btn.textContent = doneToday ? "✓ Fait aujourd'hui" : "Marquer comme fait aujourd'hui";
+  btn.classList.toggle('done-btn', doneToday);
+
+  const days = [];
+  for (let i = 27; i >= 0; i--) days.push(isoDaysAgo(i));
+
+  document.getElementById('mobility-grid').innerHTML = days.map(iso => {
+    const done = mobDates.has(iso);
+    const dayNum = parseInt(iso.split('-')[2], 10);
+    return `<div class="mob-day ${done ? 'done' : ''}" onclick="toggleMobilityDay('${iso}')" title="${iso}">${dayNum}</div>`;
+  }).join('');
+
+  const weekAgoIso = isoDaysAgo(6);
+  let weekCount = 0, monthCount = 0;
+  mobDates.forEach(iso => {
+    if (iso >= weekAgoIso && iso <= todayIso) weekCount++;
+    if (iso.slice(0, 7) === todayIso.slice(0, 7)) monthCount++;
+  });
+  document.getElementById('mobility-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-val">${weekCount}<span style="font-size:16px;color:var(--muted)">/7</span></div>
+      <div class="stat-lbl">Cette semaine</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">${monthCount}</div>
+      <div class="stat-lbl">Ce mois-ci</div>
+    </div>
+  `;
+}
+
+async function toggleMobilityDay(iso) {
+  const data = loadData();
+  const key = `MOB_${iso}`;
+  if (data[key]) {
+    const { error } = await db.from('sessions').delete().eq('athlete', ATHLETE).eq('week', 'MOB').eq('seance', iso);
+    if (error) { console.error(error); showToast('Erreur'); return; }
+  } else {
+    const entry = { athlete: ATHLETE, week: 'MOB', seance: iso, label: 'Mobilité', date_recorded: formatDateFr(iso), hooper: null, weights: {}, notes: {} };
+    const { error } = await db.from('sessions').upsert(entry, { onConflict: 'athlete,week,seance' });
+    if (error) { console.error(error); showToast('Erreur'); return; }
+  }
+  await refreshData();
+  renderMobilityTab();
 }
 
 // ═══════════════════════════════════════════════════
