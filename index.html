@@ -719,6 +719,10 @@
   <div class="section-head">Ressenti du jour</div>
   <input type="text" id="feeling-note" class="note-input" style="margin-bottom:24px" placeholder="Comment tu te sens aujourd'hui ? (motivation, courbatures, sommeil...)">
 
+  <!-- Warmup -->
+  <div class="section-head" id="warmup-section-title" style="display:none">Échauffement</div>
+  <div class="warmup-card" id="warmup-card" style="display:none"></div>
+
   <!-- Exercises -->
   <div class="section-head" id="exo-section-title">Exercices</div>
   <div id="exo-list"></div>
@@ -802,6 +806,7 @@ const SEANCES = {
   "1": {
     label: "1 — Force poids de corps",
     color: "#B22222",
+    warmup: "<strong>Échauffement :</strong> 3’ rameur (RPE 3/4)<br><strong>Puis (2 tours) :</strong><br>— 10 chaque : dos rond / dos creux<br>— 10/côté rotation épaule R1/R2/R3<br>— 10 tractions scapula (ou tirage élastique scapula)<br><strong>Puis (2 tours) :</strong><br>— 6 reps légères tirage vertical poulie<br>— 5 pompes sur genoux",
     exercices: [
       { nom: "Tractions",              series: "6 × 5",  recupTarget: "1'" },
       { nom: "Dips",                   series: "5 × 5",  recupTarget: "1'" },
@@ -1044,6 +1049,17 @@ function renderSeance() {
   updateHooper();
 
   document.getElementById('feeling-note').value = saved.notes?.['__ressenti'] ?? '';
+
+  const warmupTitleEl = document.getElementById('warmup-section-title');
+  const warmupCardEl = document.getElementById('warmup-card');
+  if (seance.warmup) {
+    warmupTitleEl.style.display = '';
+    warmupCardEl.style.display = '';
+    warmupCardEl.innerHTML = seance.warmup;
+  } else {
+    warmupTitleEl.style.display = 'none';
+    warmupCardEl.style.display = 'none';
+  }
 
   document.getElementById('exo-section-title').textContent = `Exercices — ${seance.label}`;
 
