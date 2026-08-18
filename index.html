@@ -814,7 +814,7 @@ const SEANCES = {
       { nom: "Handstand hold",         series: "4 × 30''", recupTarget: "30''" },
       { nom: "Abdos : Sit up / Chandelle / Ciseaux jambes / Hollow", series: "3 tours : 45''/15''", recupTarget: "15''" },
       { nom: "Gainage",                series: "3 × 2' (45''axe / 30''côté / 15''axe)", recupTarget: "30''" },
-      { nom: "Finisher — For time",    series: "2 tours (récup 1'30 entre tours) :<br>— 20 cal row<br>— 20 cal ski<br>— 20 cal AB<br>— 20 burpees", recupTarget: "1'30 entre tours", multilineSeries: true, bigSlots: true, slots: ["Temps 1er tour","Temps 2ème tour","Temps total"] },
+      { nom: "Finisher — For time",    series: "2 tours (récup 1'30 entre tours) :<br>— 20 cal row<br>— 20 cal ski<br>— 20 cal AB<br>— 20 burpees", recupTarget: "1'30 entre tours", multilineSeries: true, bigSlots: true, slots: ["Temps total"] },
     ]
   },
   "2": {
@@ -856,9 +856,9 @@ const SEANCE_1_S3 = {
     { nom: "Pompes",       series: "5 × 5",     recupTarget: "50''" },
     { nom: "Dips",         series: "5 × 5",     recupTarget: "1'" },
     { nom: "Shoulder tap", series: "4 × 12-15", recupTarget: "1'" },
-    { nom: "Abdos : Crunch banc à abdo / Russian twist plate banc à abdo / Gainage planche", series: "3 tours : 15 + 15 + 30''", recupTarget: "45'' entre tours" },
+    { nom: "Abdos", series: "3 tours :<br>— 15 crunch sur banc à abdo<br>— 15 russian twist avec plate sur banc à abdo<br>— 30'' gainage planche<br>— 45'' récup entre chaque tour", multilineSeries: true },
     { nom: "Gainage",      series: "3 × 2' (45''axe / 30''côté / 15''axe)", recupTarget: "30''" },
-    { nom: "Finisher — For time", series: "2 tours :<br>— 200m run<br>— 20 squat @15kg boudin<br>— 10 cal ski<br>— 10 burpees<br>— 20m fentes @15kg boudin<br>— 200m run", recupTarget: "—", multilineSeries: true, bigSlots: true, slots: ["Temps 1er tour","Temps 2ème tour","Temps total"] },
+    { nom: "Finisher — For time", series: "2 tours :<br>— 200m run<br>— 20 squat @15kg boudin<br>— 10 cal ski<br>— 10 burpees<br>— 20m fentes @15kg boudin<br>— 200m run", multilineSeries: true, bigSlots: true, slots: ["Temps total"] },
   ]
 };
 
@@ -1117,7 +1117,7 @@ function renderSeance() {
           <span class="exo-meta">Récup cible : <b>${exo.recupTarget}</b></span>
         </div>`;
     const seriesBlock = exo.multilineSeries
-      ? `<div class="exo-series-block">${exo.series}<br>Récup cible : <b>${exo.recupTarget}</b></div>`
+      ? `<div class="exo-series-block">${exo.series}</div>`
       : '';
 
     let slotsRow = '';
