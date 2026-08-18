@@ -832,8 +832,9 @@ const SEANCES = {
   },
 };
 
-// Le Finisher de la séance 1 varie sur les 2 premières semaines (progression du volume/format)
-// avant de revenir à sa version par défaut à partir de la semaine 3.
+// La séance 1 évolue sur les 3 premières semaines (progression du volume/format,
+// puis changement d'exercices en semaine 3) avant de revenir à sa version par
+// défaut à partir de la semaine 4.
 function withFinisherOverride(overrides) {
   return {
     ...SEANCES["1"],
@@ -848,10 +849,23 @@ const SEANCE_1_S2 = withFinisherOverride({
   slots: ["AMRAP A — Tour 1", "AMRAP A — Tour 2", "AMRAP B — Tour 1", "AMRAP B — Tour 2"],
   slotPlaceholder: "reps",
 });
+const SEANCE_1_S3 = {
+  ...SEANCES["1"],
+  exercices: [
+    { nom: "Tractions",    series: "6 × 5",     recupTarget: "1'" },
+    { nom: "Pompes",       series: "5 × 5",     recupTarget: "50''" },
+    { nom: "Dips",         series: "5 × 5",     recupTarget: "1'" },
+    { nom: "Shoulder tap", series: "4 × 12-15", recupTarget: "1'" },
+    { nom: "Abdos : Crunch banc à abdo / Russian twist plate banc à abdo / Gainage planche", series: "3 tours : 15 + 15 + 30''", recupTarget: "45'' entre tours" },
+    { nom: "Gainage",      series: "3 × 2' (45''axe / 30''côté / 15''axe)", recupTarget: "30''" },
+    { nom: "Finisher — For time", series: "2 tours :<br>— 200m run<br>— 20 squat @15kg boudin<br>— 10 cal ski<br>— 10 burpees<br>— 20m fentes @15kg boudin<br>— 200m run", recupTarget: "—", multilineSeries: true, bigSlots: true, slots: ["Temps 1er tour","Temps 2ème tour","Temps total"] },
+  ]
+};
 
 function getSeanceDef(week, code) {
   if (code === "1" && week === "S1") return SEANCE_1_S1;
   if (code === "1" && week === "S2") return SEANCE_1_S2;
+  if (code === "1" && week === "S3") return SEANCE_1_S3;
   return SEANCES[code];
 }
 
