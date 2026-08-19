@@ -861,10 +861,16 @@ const SEANCE_1_S3 = {
   ]
 };
 
+const SEANCE_2_S3 = {
+  ...SEANCES["2"],
+  exercices: SEANCES["2"].exercices.map(e => e.nom === "Course à pied" ? { ...e, series: "15 min footing" } : e),
+};
+
 function getSeanceDef(week, code) {
   if (code === "1" && week === "S1") return SEANCE_1_S1;
   if (code === "1" && week === "S2") return SEANCE_1_S2;
   if (code === "1" && week === "S3") return SEANCE_1_S3;
+  if (code === "2" && week === "S3") return SEANCE_2_S3;
   return SEANCES[code];
 }
 
